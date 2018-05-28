@@ -1,4 +1,3 @@
-# contactapp
 
 ## Lastenheft
 Anforderungen:
