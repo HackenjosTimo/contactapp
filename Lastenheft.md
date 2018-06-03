@@ -3,7 +3,6 @@
 
 #### Zielgruppe: <br> 
 Vertrieb XY, der den Wunsch hat seine Kundenkontakte über eine mobile App zu pflegen.
-Die App soll sowohl für die Betriebssysteme iOS und Android entwickelt werden.
 
 #### Ausgangssituation: <br>
 In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine einfache Desktop-Applikation. Dabei war man jedoch an einen Ort gebunden, was bei einer Mobile-App entfallen würde. Also bestand Handlungsbedarf und der Vertrieb hat sich entschieden, seine Kontakte über eine mobile Smartphone-App laufen zu lassen.
@@ -27,6 +26,7 @@ Das Navigieren durch die Kontakt-App erfolgt durch das Auswählen eines beliebig
 Die Daten und Inhalte werden online auf einem Server gespeichert und verwaltet. Der Client kann mit Hilfe einer WebService-Architektur auf die Daten zugreifen.
 
 #### Nichtfunktionale Anforderungen: <br>
+Die App soll sowohl für die Betriebssysteme iOS und Android entwickelt werden.
 Die Bedienbarkeit der Kontakt-App sollte so einfach wie möglich funktionieren.
 Die ganzen Funktionen, die der Benutzer in der Kontakt-App anwenden kann, machen diese immer wieder erweiterbar.
 
