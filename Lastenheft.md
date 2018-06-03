@@ -6,7 +6,7 @@ Vertrieb XY, der den Wunsch hat seine Kundenkontakte über eine mobile App zu pf
 Die App soll sowohl für die Betriebssysteme iOS und Android entwickelt werden.
 
 #### Ausgangssituation: <br>
-In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine einfache Desktop-Applikation. Dabei war man jedoch einen Ort gebunden, was bei einer Mobile-App entfallen würde. Also bestand Handlungsbedarf und der Vertrieb hat sich entschieden, seine Kontakte über eine mobile Smartphone-App laufen zu lassen.
+In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine einfache Desktop-Applikation. Dabei war man jedoch an einen Ort gebunden, was bei einer Mobile-App entfallen würde. Also bestand Handlungsbedarf und der Vertrieb hat sich entschieden, seine Kontakte über eine mobile Smartphone-App laufen zu lassen.
 
 #### Zielsetzung: <br>
 Für die Zukunft ist es dem Vertrieb daher von großer Bedeutung seine Kundenkontakte mobil auf dem Smartphone abrufen und ändern zu können. Die Mitarbeiter müssen in der Lage sein, die Kontakte schon unterwegs, wenn sie die Kunden besuchen, zu pflegen. Dies vereinfacht die vertriebsinterne Arbeit.
