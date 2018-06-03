@@ -18,9 +18,8 @@ Die Daten und Inhalte werden online auf einem Server gespeichert und verwaltet. 
 Die Navigation in der Kontakt-App erfolgt durch eingeben eines Passworts beim Login und durch klicken von entsprechenden Buttons, um einen gewünschten Effekt zu erzielen.
 
 ##### Datenbank
-Die referenzielle Integrität der Datenbank sorgt beim Löschen einer Firma für das abhängige Löschen der verknüpften Kontakte.
 
-##### - Existierende Datenbank mit den Tabellen Kunde und Kontakt.
+##### - Tabellen
 
   Tabelle Firma:
   - Id, Typ: Guid
@@ -38,7 +37,7 @@ Die referenzielle Integrität der Datenbank sorgt beim Löschen einer Firma für
   - FirmaId, Typ: Guid
   - KontaktId, Typ: Guid
 
-##### - Die Datenbank muss um die Tabelle Benutzer erweitert werden.
+Die referenzielle Integrität der Datenbank sorgt beim Löschen einer Firma für das abhängige Löschen der verknüpften Kontakte.
 
   Tabelle Benutzer:
   - Id, Typ: Guid
@@ -78,21 +77,29 @@ Es wird ein Web-Service implementiert, der folgende Methoden umfasst:
 
 ##### App(Client):
 
-Login Form, mit Name, Passwort [Abbildung Login-Form]
+Login Form, mit Name, Passwort
 
-Firma Form mit einer Liste aller Firmen [Abbildung der Firma-Form]
+<br> [Abbildung Login-Form]
+
+Firma Form mit einer Liste aller Firmen
 - Button „Neu“, öffnet Firma Details-Form mit leeren Werten
 - Button „Details“, öffnet Details-Form für die selektierte Firma
 - Button „Löschen“, löscht die selektierte Firma
 
-Firma Details-Form enthält Kontrollen für die Eingabe der Felder wie Name, PLZ, … [Abbildung der FirmaDetails-Form]
+<br> [Abbildung der Firma-Form]
+
+Firma Details-Form enthält Kontrollen für die Eingabe der Felder wie Name, PLZ, …
 - Button „Kontakte anzeigen“, öffnet Kontakt-Form mit der Liste aller Kontakte dieser Firma
 - Button „Speichern“, Speicher die Änderungen
 
-Kotakt-Form mit der Liste aller Kontakte einer Firma [Abbildung der Kontakt-Form]
+<br> [Abbildung der FirmaDetails-Form]
+
+Kotakt-Form mit der Liste aller Kontakte einer Firma 
 - Button „Neu“, öffnet Kontakt Details-Form mit leeren Werten
 - Button „Details“, öffnet Details-Form für den selektierten Kontakt
 - Button „Löschen“, löscht den selektierten Kontakt
+
+<br> [Abbildung der Kontakt-Form]
 
 #### Nichtfunktionale Anforderungen: <br>
 Die Bedienbarkeit der Kontakt-App sollte so einfach wie möglich funktionieren. Daher befinden sich in der Client-App gut sichtbar Buttons, um durch eine gewünschtes Vorhaben in der Datenbank etwas zu ändern. Die so schlichte Bedienbarkeit steigert nicht nur die Look & Feel - Anforderungen, sondern ermöglicht jedem Benutzer einen einfachen Zugang zum System. 
