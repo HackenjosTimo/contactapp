@@ -79,27 +79,31 @@ Es wird ein Web-Service implementiert, der folgende Methoden umfasst:
 
 Login Form, mit Name, Passwort
 
-<br> [Abbildung Login-Form]
+[Abbildung Login-Form]
+<br>
 
 Firma Form mit einer Liste aller Firmen
 - Button „Neu“, öffnet Firma Details-Form mit leeren Werten
 - Button „Details“, öffnet Details-Form für die selektierte Firma
 - Button „Löschen“, löscht die selektierte Firma
 
-<br> [Abbildung der Firma-Form]
+[Abbildung der Firma-Form]
+<br>
 
 Firma Details-Form enthält Kontrollen für die Eingabe der Felder wie Name, PLZ, …
 - Button „Kontakte anzeigen“, öffnet Kontakt-Form mit der Liste aller Kontakte dieser Firma
 - Button „Speichern“, Speicher die Änderungen
 
-<br> [Abbildung der FirmaDetails-Form]
+Abbildung der FirmaDetails-Form]
+<br>
 
 Kotakt-Form mit der Liste aller Kontakte einer Firma 
 - Button „Neu“, öffnet Kontakt Details-Form mit leeren Werten
 - Button „Details“, öffnet Details-Form für den selektierten Kontakt
 - Button „Löschen“, löscht den selektierten Kontakt
 
-<br> [Abbildung der Kontakt-Form]
+[Abbildung der Kontakt-Form]
+<br>
 
 #### Nichtfunktionale Anforderungen: <br>
 Die Bedienbarkeit der Kontakt-App sollte so einfach wie möglich funktionieren. Daher befinden sich in der Client-App gut sichtbar Buttons, um durch eine gewünschtes Vorhaben in der Datenbank etwas zu ändern. Die so schlichte Bedienbarkeit steigert nicht nur die Look & Feel - Anforderungen, sondern ermöglicht jedem Benutzer einen einfachen Zugang zum System. 
