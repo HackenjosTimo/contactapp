@@ -1,7 +1,7 @@
 
 ## Pflichtenheft
 
-Basierend auf dem Lastenheft. Die Funktionen und technischen Anforderungen sind hier jedoch genauer beschrieben.
+Basierend auf dem Lastenheft werden im Folgenden die Anforderungen und Umsetzungen genauer beschrieben.
 
 #### Zielgruppe: <br> 
 Vertrieb XY, der den Wunsch hat seine Kundenkontakte über eine mobile App zu pflegen.
@@ -27,6 +27,93 @@ Nach einem Login werden allen Benutzern die gleichen Inhalte dargestellt, nämli
 Das Navigieren durch die Kontakt-App erfolgt durch das Auswählen eines beliebigen Kontakt oder Firmenfeldes um an weitere Informationen zu gelangen.
 
 Die Daten und Inhalte werden online auf einem Server gespeichert und verwaltet. Der Client kann mit Hilfe einer WebService-Architektur auf die Daten zugreifen.
+
+
+#### Datenbank
+
+Die referenzielle Integrität der Datenbank sorgt beim Löschen einer Firma für das abhängige Löschen der verknüpften Kontakte.
+
+Des Weiteren sollte die Server-Applikation Time-Outs erkennen und  den Benutzer nach einer längeren Abwesenheit neu einloggen lassen.
+
+#### - Existierende Datenbank mit den Tabellen Kunde und Kontakt.
+
+  Tabelle Firma:
+  - Id, Typ: Guid
+  - Name, Typ: char(50)
+  - PLZ, Typ: char(6)
+  - Ort, Typ: char(50)
+  - Strasse, Typ: char (50)
+  
+  Tabelle Kontakt:
+  - Id, Typ: Guid
+  - Name, Typ: char(50)
+  - Vorname, Typ: char(30)
+
+  Tabelle FirmaKontakt:
+  - FirmaId, Typ: Guid
+  - KontaktId, Typ: Guid
+
+#### - Die Datenbank muss um die Tabelle Benutzer erweitert werden.
+
+  Tabelle Benutzer:
+  - Id, Typ: Guid
+  - Name, Typ: char(50)
+  - Passwort, Typ: char(50)
+
+Das Feld Passwort muss verschlüsselt abgespeichert werden.
+
+
+#### Server:
+
+Es wird ein Web-Service implementiert, der folgende Methoden umfasst:
+
+- Login(string Name, string Passwort)
+<br> Rückgabewert: Session-Id, Typ: Guid
+
+- Logout(Guid sessionId)
+
+- GetAllFirma(Guid sessionId)
+<br> Rückgabewert: List<FirmaObject>
+
+- AddFirma(Guid sessionId, object firma)
+
+- UpdateFirma(Guid sessionId, object firma)
+
+- DeleteFirma(Guid sessionId, Guid firmaId)
+
+- GetAllKontakt(Guid sessionId, Guid firmaId)
+<br> Rückgabewert: List<KontaktObject>
+
+- AddKontakt(Guid sessionId, Guid firmaId, object Kontakt)
+
+- UpdateKontakt(Guid sessionId, Guid kontaktId)
+
+- DeleteKontakt(Guid sessionId, Guid kontaktId)
+
+
+#### App (Client):
+
+Login Form, mit Name, Passwort [Abbildung Login-Form]
+
+Firma Form mit einer Liste aller Firmen [Abbildung der Firma-Form]
+- Button „Neu“, öffnet Firma Details-Form mit leeren Werten
+- Button „Details“, öffnet Details-Form für die selektierte Firma
+- Button „Löschen“, löscht die selektierte Firma
+
+Firma Details-Form enthält Kontrollen für die Eingabe der Felder wie Name, PLZ, … [Abbildung der FirmaDetails-Form]
+- Button „Kontakte anzeigen“, öffnet Kontakt-Form mit der Liste aller Kontakte dieser Firma
+- Button „Speichern“, Speicher die Änderungen
+
+Kotakt-Form mit der Liste aller Kontakte einer Firma [Abbildung der Kontakt-Form]
+- Button „Neu“, öffnet Kontakt Details-Form mit leeren Werten
+- Button „Details“, öffnet Details-Form für den selektierten Kontakt
+- Button „Löschen“, löscht den selektierten Kontakt
+
+
+
+
+
+
 
 #### Nichtfunktionale Anforderungen: <br>
 Die Bedienbarkeit der Kontakt-App sollte so einfach wie möglich funktionieren.
