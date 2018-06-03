@@ -4,7 +4,7 @@
 > Basierend auf dem Lastenheft werden im Folgenden die Anforderungen und Umsetzungen an das Produkt genauer beschrieben.
 
 #### Zielgruppe: <br> 
-Vertrieb 
+
 
 #### Ausgangssituation: <br>
 In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine einfache Desktop-Applikation. Dabei war man jedoch einen Ort gebunden, was bei einer Mobile-App entfallen würde. Also bestand Handlungsbedarf und der Vertrieb hat sich entschieden, seine Kontakte über eine mobile Smartphone-App laufen zu lassen.
