@@ -4,7 +4,7 @@
 | Beschreibung | Kosten in € (Euro) |
 | ------------- | ------------- |
 | **Implementierung Web-Server** | |
-| **Implementierung App(Client)** | **3.000 €** |
+| **Implementierung App(Client)** | ** €** |
 
 
 
