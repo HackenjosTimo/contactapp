@@ -84,6 +84,7 @@ Es wird ein Web-Service implementiert, der folgende Methoden umfasst:
 Login Form, mit Name, Passwort
 
 [Abbildung Login-Form]
+<br> 
 <br>
 
 Firma Form mit einer Liste aller Firmen
@@ -93,12 +94,14 @@ Firma Form mit einer Liste aller Firmen
 
 [Abbildung der Firma-Form]
 <br>
+<br>
 
 Firma Details-Form enthält Kontrollen für die Eingabe der Felder wie Name, PLZ, …
 - Button „Kontakte anzeigen“, öffnet Kontakt-Form mit der Liste aller Kontakte dieser Firma
 - Button „Speichern“, Speicher die Änderungen
 
 Abbildung der FirmaDetails-Form]
+<br>
 <br>
 
 Kotakt-Form mit der Liste aller Kontakte einer Firma 
@@ -107,6 +110,7 @@ Kotakt-Form mit der Liste aller Kontakte einer Firma
 - Button „Löschen“, löscht den selektierten Kontakt
 
 [Abbildung der Kontakt-Form]
+<br>
 <br>
 
 #### Nichtfunktionale Anforderungen: <br>
