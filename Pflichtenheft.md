@@ -4,20 +4,24 @@
 > Basierend auf dem Lastenheft werden im Folgenden die Anforderungen und Umsetzungen an das Produkt genauer beschrieben.
 
 #### Zielgruppe: <br> 
-Es muss gewährleistet sein, dass jeder Mitarbeiter des Vertriebs, der mit Kunden zu tun hat oder sogar in Kontakt kommt, Zugang zur Kontakt-App hat, um die Kontaktdaten immmer nach dem aktuellsten Stand abfragen zu können.
+Vertriebsmitarbeiter, die in Kunden-Kontakt stehen, um stetige Verfügbarkeit der Kontaktdaten mittels einer App zu haben.
 
 #### Ausgangssituation: <br>
-In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine einfache Desktop-Applikation. Dabei war man jedoch einen Ort gebunden, was bei einer Mobile-App entfallen würde. Also bestand Handlungsbedarf und der Vertrieb hat sich entschieden, seine Kontakte über eine mobile Smartphone-App laufen zu lassen.
+In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine Desktop-Applikation im Back-Office. Also bestand Handlungsbedarf seitens des Vertriebs, um online die Kontaktdaten via einer mobile Smartphone-App abzufragen und ändern zu können.
 
 #### Zielsetzung: <br>
-Für die Zukunft ist es dem Vertrieb daher von großer Bedeutung seine Kundenkontakte mobil auf dem Smartphone abrufen und ändern zu können. Die Mitarbeiter müssen in der Lage sein, die Kontakte schon unterwegs, wenn sie die Kunden besuchen, zu pflegen. Dies vereinfacht die vertriebsinterne Arbeit.
+Entwicklung von zwei Software-Komponenten.
+
+Server-seitig wird ein WebService implementiert, der alle Methoden für die Verwaltung von Firmen und Kontakten zur Verfügung stellt. Es wir davon ausgegangen, dass die infrastruktuellen Voraussetzungen (Hardware und Anbindung an das Internet, sowie ein Datenbank-Server) bereits zur Verfügung stehen.
+
+Client-seitig wird eine App, die sowohl für die mobilen Betriebssystem Android und iOS zur Verfügung steht, implementiert.
 
 #### Funktionale Anforderungen: <br>
 Die Daten und Inhalte werden online auf einem Server gespeichert und verwaltet. Der Client kann mit Hilfe einer WebService-Architektur auf die Daten zugreifen.
 
-Die Navigation in der Kontakt-App erfolgt durch eingeben eines Passworts beim Login und durch klicken von entsprechenden Buttons, um einen gewünschten Effekt zu erzielen.
+Die Navigation in der Kontakt-App erfolgt durch Eingeben eines Passworts beim Login und durch klicken von entsprechenden Buttons, um einen gewünschten Effekt zu erzielen.
 
-##### Datenbank
+##### Datenbank-Schema
 
 ##### - Tabellen
 
@@ -106,8 +110,8 @@ Kotakt-Form mit der Liste aller Kontakte einer Firma
 <br>
 
 #### Nichtfunktionale Anforderungen: <br>
-Die Bedienbarkeit der Kontakt-App sollte so einfach wie möglich funktionieren. Daher befinden sich in der Client-App gut sichtbar Buttons, um durch eine gewünschtes Vorhaben in der Datenbank etwas zu ändern. Die so schlichte Bedienbarkeit steigert nicht nur die Look & Feel - Anforderungen, sondern ermöglicht jedem Benutzer einen einfachen Zugang zum System. 
+Die Bedienbarkeit der Kontakt-App sollte so einfach wie möglich erfolgen, die Mitarbeiter sich intuitiv zurecht finden. Daher befinden sich in der Client-App gut sichtbar Buttons. Die so schlichte Bedienbarkeit steigert nicht nur die Look & Feel-Anforderungen, sondern ermöglicht jedem Benutzer einen einfachen Zugang zum System. Es ist zu berücksichtigen, dass auch Mitarbeiter mit Sehbehinderungen die App bedienen können.
 
 #### Sicherheitsanforderungen: <br>
-Die Kontaktdaten müssen vor dem Zugriff vor Dritten geschützt werden, um eine Korrektheit der eingepflegten Daten zu gewährleisten. Das System muss daher eine Benutzer-Verwaltung enthalten und die Client-App mit einem Login geschützt sein.
-Des Weiteren sollte die Server-Applikation Time-Outs erkennen und  den Benutzer nach einer längeren Abwesenheit neu einloggen lassen.
+Die Kontaktdaten müssen vor dem Zugriff vor Dritten geschützt werden, um die Korrektheit der eingepflegten Daten zu gewährleisten. Das System muss daher eine Benutzer-Verwaltung enthalten und die Client-App mit einem Login geschützt sein.
+Die Server-Applikation wird in der Lage sein, Time-Outs zu erkennen. Die Client-App wird im Time-Out Fall den Benutzer auffordern, ein Re-Login durchzuführen.
