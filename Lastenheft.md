@@ -17,7 +17,7 @@ Anlegen eines Kontakts, Updaten eines Kontakts und Löschen eines Kontakts,
 Anlegen einer Firma, Updaten einer Firma und Löschen einer Firma,
 Außerdem sollte man die Beziehung von einem Kontakt zur dazugehörenden Firma Anlegen und Löschen können.
 
-Jeder Kundenkontakt bsitzt einen Namen und jede Firma besitzt einen Namen, eine Adresse und die dazugehörigen Mitarbeiter
+Jeder Kundenkontakt besitzt einen Namen und jede Firma besitzt einen Namen, eine Adresse und die dazugehörigen Mitarbeiter
 
 Vor dem Benutzen der Kontakt-App muss sich der Benutzer einloggen.
 Nach einem Login werden allen Benutzern die gleichen Inhalte dargestellt, nämlich eine Seite mit einem Suchfeld, in das man sowohl den Kontakt als auch die Firma eingeben kann. Der Benutzer hat nun die Möglichkeiten die Inhalte anzuschauen und diese aber auch zu Bearbeiten.
