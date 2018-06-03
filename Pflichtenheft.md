@@ -4,7 +4,7 @@
 > Basierend auf dem Lastenheft werden im Folgenden die Anforderungen und Umsetzungen an das Produkt genauer beschrieben.
 
 #### Zielgruppe: <br> 
-
+Es muss gewährleistet sein, dass jeder Mitarbeiter des Vertriebs, der mit Kunden zu tun hat oder sogar in Kontakt kommt, Zugang zur Kontakt-App hat, um die Kontaktdaten immmer nach dem aktuellsten Stand abfragen zu können.
 
 #### Ausgangssituation: <br>
 In der Vergangheit pflegte der Vertrieb seine Kundenkontakte über eine einfache Desktop-Applikation. Dabei war man jedoch einen Ort gebunden, was bei einer Mobile-App entfallen würde. Also bestand Handlungsbedarf und der Vertrieb hat sich entschieden, seine Kontakte über eine mobile Smartphone-App laufen zu lassen.
@@ -18,7 +18,6 @@ Die Daten und Inhalte werden online auf einem Server gespeichert und verwaltet. 
 Die Navigation in der Kontakt-App erfolgt durch eingeben eines Passworts beim Login und durch klicken von entsprechenden Buttons, um einen gewünschten Effekt zu erzielen.
 
 ##### Datenbank
-
 Die referenzielle Integrität der Datenbank sorgt beim Löschen einer Firma für das abhängige Löschen der verknüpften Kontakte.
 
 ##### - Existierende Datenbank mit den Tabellen Kunde und Kontakt.
