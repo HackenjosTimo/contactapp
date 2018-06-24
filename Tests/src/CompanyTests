@@ -1,1 +1,114 @@
+package com.company;
 
+import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.*;
+
+public class CompanyTests {
+
+    @Test
+    public void repository_addNewPersons_personsAdded() {
+        Repository repo = new Repository();
+
+        Person person1 = repo.addPerson("p1");
+        Person person2 = repo.addPerson("p2");
+
+        List<Person> persons = repo.getAllPersons();
+
+        assertEquals(2, persons.size());
+        assertEquals("p1", persons.get(0).getName());
+        assertEquals("p2", persons.get(1).getName());
+    }
+
+    @Test
+    public void repository_addNewCompanies_companiesAdded() {
+        Repository repo = new Repository();
+
+        Company company1 = repo.addCompany("c1");
+        Company company2 = repo.addCompany("c2");
+
+        List<Company> companies = repo.getAllCompanies();
+
+        assertEquals(2, companies.size());
+        assertEquals("c1", companies.get(0).getName());
+        assertEquals("c2", companies.get(1).getName());
+    }
+
+    @Test
+    public void repository_getSortedCompanies_companiesSorted() {
+        Repository repo = new Repository();
+
+        repo.addCompany("Z");
+        repo.addCompany("A");
+        repo.addCompany("K");
+
+        List<Company> sorted = repo.getSortedCompanies();
+
+        assertEquals(3, sorted.size());
+        assertEquals("A", sorted.get(0).getName());
+        assertEquals("K", sorted.get(1).getName());
+        assertEquals("Z", sorted.get(2).getName());
+    }
+
+    @Test
+    public void repository_deleteCompanyWithoutEmployees_companyDeleted() {
+        Repository repo = new Repository();
+
+        Company company1 = repo.addCompany("c1");
+        Company company2 = repo.addCompany("c2");
+
+        repo.deleteCompany(company1, false);
+
+        List<Company> companies = repo.getAllCompanies();
+
+        assertEquals(1, companies.size());
+        assertEquals("c2", companies.get(0).getName());
+    }
+
+    @Test
+    public void repository_deleteCompanyWithEmployees_companyAndEmployeesDeleted() {
+        Repository repo = new Repository();
+
+        Person person1 = repo.addPerson("p1");
+        Person person2 = repo.addPerson("p2");
+
+        Company company = repo.addCompany("c");
+
+        company.addEmployee(person1);
+
+        repo.deleteCompany(company, true);
+
+        List<Company> companies = repo.getAllCompanies();
+
+        assertEquals(0, companies.size());
+
+        List<Person> persons = repo.getAllPersons();
+
+        assertEquals(1, persons.size());
+        assertEquals("p2", persons.get(0).getName());
+    }
+
+    @Test
+    public void company_isEmployee_employeeDoesNotExists() {
+        Repository repo = new Repository();
+
+        Person employee = new Person("p");
+        Company company = new Company("c");
+
+        assertEquals(false, company.isEmployee(employee));
+    }
+
+    @Test
+    public void company_isEmployee_employeeExists() {
+        Repository repo = new Repository();
+
+        Person employee = new Person("p");
+        Company company = new Company("c");
+
+        company.addEmployee(employee);
+
+        assertEquals(true, company.isEmployee(employee));
+    }
+}
