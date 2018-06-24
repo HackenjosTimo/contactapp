@@ -1,1 +1,54 @@
-R
+package com.company;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class Repository {
+
+    private List<Person> persons = new ArrayList<>();
+    private List<Company> companies = new ArrayList<>();
+
+    public Person addPerson(String name) {
+        Person person = new Person(name);
+        persons.add(person);
+
+        return person;
+    }
+
+    public void deletePerson(Person person) {
+        persons.remove(person);
+    }
+
+    public List<Person> getAllPersons() {
+        return persons;
+    }
+
+    public Company addCompany(String name) {
+        Company company = new Company(name);
+        companies.add(company);
+
+        return company;
+    }
+
+    public void deleteCompany(Company company, boolean deleteAllEmployees) {
+        if (deleteAllEmployees) {
+            for (Person employee : company.getAllEmployees()) {
+                deletePerson(employee);
+            }
+        }
+
+        companies.remove(company);
+    }
+
+    public List<Company> getSortedCompanies() {
+        List<Company> sorted = new ArrayList<>(companies);
+        Collections.sort(sorted, (c1, c2) -> c1.getName().compareTo(c2.getName()));
+        return sorted;
+    }
+
+    public List<Company> getAllCompanies() {
+        return companies;
+    }
+}
+
