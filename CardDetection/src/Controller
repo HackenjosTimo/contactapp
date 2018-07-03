@@ -1,1 +1,147 @@
+package sample;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+
+public class Controller
+{
+    @FXML
+    private Button startButton;
+
+    @FXML
+    private ImageView imageView;
+
+    private VideoStream videoStream;
+    private CardDetection cardDetection;
+
+    // a timer for acquiring the video stream
+    private ScheduledExecutorService timer;
+
+    // a flag to change the button behavior
+    private boolean cam_active;
+
+    /**
+     * Init the controller, at start time
+     */
+    protected void init()
+    {
+        this.cardDetection = new CardDetection();
+        this.cardDetection.init("resources/Card_Imgs/");
+
+        // Initialize camera object and video feed from the camera. The video stream is set up
+        // as a separate thread that constantly grabs frames from the camera feed.
+        this.videoStream = new VideoStream();
+    }
+
+    /**
+     * The action triggered by pushing the button on the GUI
+     */
+    @FXML
+    protected void onStartStop()
+    {
+        if (!this.cam_active)
+        {
+            start();
+        }
+        else
+        {
+            stop();
+        }
+    }
+
+    private void start() {
+        //this.videoStream.start("resources/Cards Black 3.mp4");
+        this.videoStream.start(0);
+
+        this.cam_active = true;
+
+        // grab a frame every 33 ms (30 frames/sec)
+        Runnable frameGrabber = () -> update();
+
+        this.timer = Executors.newSingleThreadScheduledExecutor();
+        this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
+
+        this.startButton.setText("Stop");
+    }
+
+    private void stop(){
+        // stop the timer
+        this.stopAcquisition();
+
+        this.videoStream.stop();
+
+        // the camera is not active at this point
+        this.cam_active = false;
+
+        this.startButton.setText("Start");
+    }
+
+    private void update() {
+        // Grab frame from video stream
+        Mat image = videoStream.read();
+
+        if (!image.empty()) {
+
+            image = cardDetection.detect(image);
+
+            // convert and show the frame
+            Image imageToShow = Utils.mat2Image(image);
+
+            if (imageToShow != null)
+            {
+                updateImageView(imageView, imageToShow);
+            }
+        }
+    }
+
+    /**
+     * Stop the acquisition from the camera and release all the resources
+     */
+    private void stopAcquisition()
+    {
+        if (this.timer != null && !this.timer.isShutdown())
+        {
+            try
+            {
+                // stop the timer
+                this.timer.shutdown();
+                this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
+            }
+            catch (InterruptedException e)
+            {
+                // log any exception
+                System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
+            }
+        }
+    }
+
+    /**
+     * Update the {@link ImageView} in the JavaFX main thread
+     *
+     * @param view
+     *            the {@link ImageView} to update
+     * @param image
+     *            the {@link Image} to show
+     */
+    private void updateImageView(ImageView view, Image image)
+    {
+        Utils.onFXThread(view.imageProperty(), image);
+    }
+
+    /**
+     * On application close, stop the acquisition from the camera
+     */
+    protected void setClosed()
+    {
+        this.stopAcquisition();
+    }
+}
