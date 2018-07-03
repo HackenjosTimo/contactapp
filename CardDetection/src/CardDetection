@@ -1,1 +1,557 @@
+package sample;
+
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+import org.opencv.utils.Converters;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class CardDetection {
+
+    // Adaptive threshold levels
+    private static final int BKG_THRESH = 66;
+    private static final int CARD_THRESH = 30;
+
+    // Width and height of card corner, where rank and suit are
+    private static final int CORNER_WIDTH = 32;
+    private static final int CORNER_HEIGHT = 84;
+
+    // Dimensions of rank train images
+    private static final int RANK_WIDTH = 70;
+    private static final int RANK_HEIGHT = 125;
+
+    // Dimensions of suit train images
+    private static final int SUIT_WIDTH = 70;
+    private static final int SUIT_HEIGHT = 100;
+
+    private static final double RANK_DIFF_MAX = 0.25;
+    private static final double SUIT_DIFF_MAX = 0.25;
+
+    private static final int font = Core.FONT_HERSHEY_SIMPLEX;
+
+    private List<Rank> trainedRanks;
+    private List<Suit> trainedSuits;
+
+    private class Rank {
+
+        public Mat image;
+        public String name = "Placeholder";
+
+        public String toString() { return name; }
+    }
+
+    private class Suit {
+
+        public Mat image;
+        public String name = "Placeholder";
+
+        public String toString() { return name; }
+    }
+
+    public void init(String filepath) {
+
+        // Load the train rank and suit images
+        trainedRanks = loadRanks("resources/Card_Imgs/");
+        trainedSuits = loadSuits("resources/Card_Imgs/");
+    }
+
+    public Mat detect(Mat image) {
+
+        // Pre-process camera image (gray, blur, and threshold it)
+        Mat pre_proc = preprocessImage(image);
+
+        // Find and sort the contours of all cards in the image
+        List<MatOfPoint> contours = findCards(pre_proc);
+
+        // If there are no contours, do nothing
+        if (contours.size() > 0) {
+
+            // Initialize a new "cards" list to assign the card objects.
+            // indexes the newly made array of cards.
+            List<Card> cards = new ArrayList<>();
+
+            double scale = 1;
+
+            // For each contour detected:
+            for (int i = 0; i < contours.size(); i++) {
+
+                // Create a card object from the contour and append it to the list of cards.
+                // preprocessCard function takes the card contour and contour and
+                // determines the cards properties (corner points, etc).It generates a
+                // flattened 200 x 300 image of the card, and isolates the card 's
+                // suit and rank from the image.
+                Card card = preprocessCard(contours.get(i), image);
+
+                cards.add(card);
+
+                // Find the best rank and suit match for the card.
+                matchCard(card);
+
+                // Draw center point and match result on the image.
+                scale = drawResult(image, card);
+            }
+
+            Imgproc.putText(image, Integer.toString(cards.size()), new Point(50,50), font, scale, new Scalar(255, 255, 255), 2 * (int)scale, Imgproc.LINE_AA, false);
+
+            // Draw card contours on image(have to do contours all at once or
+            // they do not show up properly for some reason)
+            if (cards.size() > 0) {
+                List<MatOfPoint> tempContours = new ArrayList<>();
+
+                for (int i = 0; i < cards.size(); i++)
+                    tempContours.add(cards.get(i).contour);
+
+                Imgproc.drawContours(image, tempContours, -1, new Scalar(255, 0, 0), 5 * (int)scale);
+            }
+        }
+
+        return image;
+    }
+
+    private List<Rank> loadRanks(String filepath) {
+
+        List<String> ranks = Arrays.asList("Ass", "Sieben", "Acht", "Neun", "Zehn", "Bube", "Dame", "Koenig");
+        List<Rank> trainedRanks = new ArrayList<Rank>();
+
+        for (String Rank : ranks) {
+            CardDetection.Rank trainRanks = new Rank();
+
+            trainRanks.name = Rank;
+
+            String filename = Rank + ".png";
+            trainRanks.image = Imgcodecs.imread(filepath + filename, Imgcodecs.IMREAD_GRAYSCALE);
+
+            trainedRanks.add(trainRanks);
+        }
+
+        return trainedRanks;
+    }
+
+    private List<Suit> loadSuits(String filepath) {
+
+        List<String> suits = Arrays.asList("Kreuz", "Pik", "Karo", "Herz");
+        List<Suit> trainedSuits = new ArrayList<Suit>();
+
+        for (String Suite : suits) {
+            Suit trainSuits = new Suit();
+
+            trainSuits.name = Suite;
+
+            String filename = Suite + ".png";
+            trainSuits.image = Imgcodecs.imread(filepath + filename, Imgcodecs.IMREAD_GRAYSCALE);
+
+            trainedSuits.add(trainSuits);
+        }
+
+        return trainedSuits;
+    }
+
+    private static Mat preprocessImage(Mat image) {
+        // Returns a grayed, blurred, and adaptively thresholded camera image.
+
+        Mat grayedImage = new Mat();
+        Imgproc.cvtColor(image, grayedImage, Imgproc.COLOR_BGR2GRAY);
+        Imgcodecs.imwrite("grayedImage.png", grayedImage);
+
+        Mat blurredImage = new Mat();
+        Imgproc.GaussianBlur(grayedImage, blurredImage, new Size(5, 5),3);
+
+        Imgcodecs.imwrite("blurredImage.png", grayedImage);
+        // The best threshold level depends on the ambient lighting conditions.
+        // For bright lighting, a high threshold must be used to isolate the cards
+        // from the background. For dim lighting, a low threshold must be used.
+        // To make the card detector independent of lighting conditions, the
+        // following adaptive threshold method is used.
+        //
+        // A background pixel in the center top of the image is sampled to determine
+        // its intensity. The adaptive threshold is set at 60 (BKG_THRESH) higher
+        // than that. This allows the threshold to adapt to the lighting conditions.
+        int imageWidth = image.width();
+        int imageHeight = image.height();
+
+        double backgroundLevel = grayedImage.get(imageHeight / 100, imageWidth / 2)[0];
+        double treshold = backgroundLevel + BKG_THRESH;
+
+        Mat thresholdImage = new Mat();
+        Imgproc.threshold(blurredImage, thresholdImage, treshold,255, Imgproc.THRESH_BINARY);
+
+        Imgcodecs.imwrite("thresholdImage.png", thresholdImage);
+
+        return thresholdImage;
+    }
+
+    private static List<MatOfPoint> findCards(Mat thresholdImage) {
+        // Finds all card-sized contours in a thresholded camera image.
+        // Returns the number of cards, and a list of card contours sorted
+        // from largest to smallest.
+        List<MatOfPoint> cardContours = new ArrayList<>();
+
+        // Find contours and sort their indices by contour size
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Mat hierarchy = new Mat();
+
+        Imgproc.findContours(thresholdImage, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        contours.sort((i, j) -> ((Double)Imgproc.contourArea(i)).compareTo(Imgproc.contourArea(j)) * -1);
+
+        // Determine which of the contours are cards by applying the size as criteria.
+        for (int i = 0; i < contours.size(); i++) {
+
+            MatOfPoint2f point = new MatOfPoint2f(contours.get(i).toArray());
+
+            double perimeter = Imgproc.arcLength(point, true);
+            double size = Imgproc.contourArea(contours.get(i));
+
+            MatOfPoint2f approx = new MatOfPoint2f();
+            Imgproc.approxPolyDP(point, approx, 0.01 * perimeter, true);
+
+            boolean b1 = (size < thresholdImage.total() / 2);
+            boolean b2 = (size > thresholdImage.total() / 40);
+            boolean b3 = (approx.toArray().length == 4);
+
+            if (b1 && b2 && b3)
+                cardContours.add(contours.get(i));
+        }
+
+        return cardContours;
+    }
+
+    private Card preprocessCard(MatOfPoint contour, Mat image) {
+        // Uses contour to find information about the query card. Isolates rank
+        // and suit images from the card.
+
+        // Initialize new Card object
+        Card card = new Card();
+
+        card.contour = contour;
+
+        // Find perimeter of card and use it to approximate corner points
+        MatOfPoint2f con = new MatOfPoint2f(contour.toArray());
+        double perimeter = Imgproc.arcLength(con, true);
+
+        MatOfPoint2f approx = new MatOfPoint2f();
+        Imgproc.approxPolyDP(con, approx, .01 * perimeter, true);
+
+        MatOfPoint pts = new MatOfPoint();
+        approx.convertTo(pts, CvType.CV_32S);
+
+        card.cornerPoints = pts;
+
+        // Find width and height of card's bounding rectangle
+        Rect rect = Imgproc.boundingRect(contour);
+
+        card.width = rect.width;
+        card.height = rect.height;
+
+        // Find center point of card by taking x and y average of the four corners.
+        card.center = new Point(rect.x + (rect.width / 2),rect.y + (rect.height / 2));
+
+        // Warp card into 200 x 300 flattened image using perspective transform
+        card.warp = flatten(image, pts, rect.width, rect.height);
+
+        Imgcodecs.imwrite("warp.png", card.warp);
+
+        // Grab corner of warped card image and do a 4x zoom
+        Mat cornerImage = new Mat(card.warp, new Rect(0, 0, CORNER_WIDTH, CORNER_HEIGHT));
+        Mat zoomedCornerImage = new Mat();
+
+        Imgproc.resize(cornerImage, zoomedCornerImage, new Size(0, 0), 4, 4, Imgproc.INTER_LINEAR);
+
+        // Sample known white pixel intensity to determine good threshold level
+        double whiteLevel = zoomedCornerImage.get(15, (CORNER_WIDTH * 4) / 2)[0];
+        double threshold = whiteLevel - CARD_THRESH;
+
+        if (threshold <= 0)
+            threshold = 1;
+
+        Mat thresholdImage = new Mat();
+        Imgproc.threshold(zoomedCornerImage, thresholdImage, threshold, 255, Imgproc.THRESH_BINARY_INV);
+
+        // Split in to top and bottom half (top shows rank, bottom shows suit)
+        Rect rectRank = new Rect(0, 0, CORNER_WIDTH * 4, CORNER_HEIGHT * 2);
+        Rect rectSuit = new Rect(0, CORNER_HEIGHT * 2, CORNER_WIDTH * 4, CORNER_HEIGHT * 2);
+
+        Mat rankImage = new Mat(thresholdImage, rectRank);
+
+        Imgcodecs.imwrite("rank.png", rankImage);
+
+        // Find rank contour and bounding rectangle, isolate and find largest contour
+        List<MatOfPoint> rankContours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+
+        Imgproc.findContours(rankImage, rankContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        rankContours.sort((i, j) -> ((Double)Imgproc.contourArea(i)).compareTo(Imgproc.contourArea(j)) * -1);
+
+        // Find bounding rectangle for largest contour, use it to resize query rank
+        // image to match dimensions of the train rank image
+        if (rankContours.size() > 0) {
+            Rect rect1 = Imgproc.boundingRect(rankContours.get(0));
+
+            Mat rankRoi = new Mat(rankImage, rect1);
+
+            Mat rankSized = new Mat();
+            Imgproc.resize(rankRoi, rankSized, new Size(RANK_WIDTH, RANK_HEIGHT), 0, 0, Imgproc.INTER_LINEAR);
+
+            card.rankImage = rankSized;
+
+            Imgcodecs.imwrite("rankSized.png", rankSized);
+
+            rectSuit.y = rect1.y + rect1.height + 1;
+            rectSuit.height = CORNER_HEIGHT * 4 - rectSuit.y;
+        }
+
+        Mat suitImage = new Mat(thresholdImage, rectSuit);
+
+        Imgcodecs.imwrite("suit.png", suitImage);
+
+        // Find suit contour and bounding rectangle, isolate and find largest contour
+        List<MatOfPoint> suitContours = new ArrayList<MatOfPoint>();
+        hierarchy = new Mat();
+
+        Imgproc.findContours(suitImage, suitContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        suitContours.sort((i, j) -> ((Double)Imgproc.contourArea(i)).compareTo(Imgproc.contourArea(j)) * -1);
+
+        // Find bounding rectangle for largest contour, use it to resize query suit
+        // image to match dimensions of the train suit image
+        if (suitContours.size() > 0) {
+            Rect rect2 = Imgproc.boundingRect(suitContours.get(0));
+
+            Mat suitRoi = new Mat(suitImage, rect2);
+
+            Mat suitSized = new Mat();
+            Imgproc.resize(suitRoi, suitSized, new Size(SUIT_WIDTH, SUIT_HEIGHT), 0, 0, Imgproc.INTER_LINEAR);
+
+            card.suitImage = suitSized;
+
+            Imgcodecs.imwrite("suitSized.png", suitSized);
+        }
+
+        return card;
+    }
+
+    private void matchCard(Card card) {
+
+        // Finds best rank and suit matches for the query card. Differences
+        // the query card rank and suit images with the train rank and suit images.
+        // The best match is the rank or suit image that has the least difference.
+
+        double bestRankDiff = Double.MAX_VALUE;
+        double bestSuitDiff = Double.MAX_VALUE;
+        String bestRankName = Card.UNKNOWN;
+        String bestSuitName = Card.UNKNOWN;
+
+        // If no contours were found in query card in preprocessCard function,
+        // the img size is zero, so skip the differencing process
+        // (card will be left as Unknown)
+        if (!card.rankImage.empty() && !card.suitImage.empty()) {
+
+            // Difference the query card rank image from each of the train rank images,
+            // and store the result with the least difference
+            for (Rank rank : trainedRanks) {
+
+                double rankDiff = Utils.getDiff(card.rankImage, rank.image);
+
+                if (rankDiff < bestRankDiff) {
+                    bestRankDiff = rankDiff;
+                    bestRankName = rank.name;
+                }
+            }
+
+            // Same process with suit images
+            for (Suit suit : trainedSuits) {
+
+                double suitDiff = Utils.getDiff(card.suitImage, suit.image);
+
+                if (suitDiff < bestSuitDiff) {
+                    bestSuitDiff = suitDiff;
+                    bestSuitName = suit.name;
+                }
+            }
+        }
+
+        // Combine best rank match and best suit match to get query card 's identity.
+        // If the best matches have too high of a difference value, card identity
+        // is still Unknown
+        if (bestRankDiff < RANK_DIFF_MAX) {
+            card.matchedRank = bestRankName;
+            card.diffRank = bestRankDiff;
+        }
+
+        if (bestSuitDiff < SUIT_DIFF_MAX) {
+            card.matchedSuit = bestSuitName;
+            card.diffSuit = bestSuitDiff;
+        }
+    }
+
+    private static double drawResult(Mat image, Card card) {
+
+        // Draw the card name on the camera image.
+        String name = card.toString();
+
+        int[] baseLine = new int[1];
+        Size size = Imgproc.getTextSize("X", font, 1, 2, baseLine);
+
+        double scale = (double)image.height() / 800;
+        size = Imgproc.getTextSize(name, font, scale, 5 * (int)scale, baseLine);
+
+        double x = card.center.x;
+        double y = card.center.y;
+
+        Imgproc.putText(image, name, new Point(x - size.width / 2,y - size.height / 2), font, scale, new Scalar(255, 0, 0), 5 * (int)scale, Imgproc.LINE_AA, false);
+
+        return scale;
+    }
+
+    private static Mat flatten(Mat image, MatOfPoint pts, int width, int height)
+    {
+        // Flattens an image of a card into a top-down 200 x 300 perspective.
+        // Returns the flattened, re-sized, grayed image.
+
+        List<Point> sortedPoints = new ArrayList<>();
+
+        for (int i = 0; i < pts.rows(); i++)
+            sortedPoints.add(new Point(pts.get(i, 0)));
+
+        Point pointsSum = new Point();
+
+        for (Point point : sortedPoints) {
+            pointsSum.x += point.x;
+            pointsSum.y += point.y;
+        }
+
+        Point center = new Point(pointsSum.x / sortedPoints.size(), pointsSum.y / sortedPoints.size());
+
+        sortedPoints.sort((a, b) ->
+        {
+            //  Fetch the atans
+            double aTanA = Math.atan2(a.y - center.y, a.x - center.x);
+            double aTanB = Math.atan2(b.y - center.y, b.x - center.x);
+
+            //  Determine next point in Clockwise rotation
+            if (aTanA < aTanB)
+                return -1;
+            else if (aTanB < aTanA)
+                return 1;
+
+            return 0;
+        });
+
+        Point tl = sortedPoints.get(0);
+        Point tr = sortedPoints.get(1);
+        Point br = sortedPoints.get(2);
+        Point bl = sortedPoints.get(3);
+
+        Point[] tempRect = new Point[4];
+
+        for (int i = 0; i < 4; i++)
+            tempRect[i] = new Point(0, 0);
+
+        // Need to create an array listing points in order of
+        // [top left, top right, bottom right, bottom left]
+        // before doing the perspective transform
+
+        if (width <= 0.8 * height) { // If card is vertically oriented)
+            tempRect[0] = tl;
+            tempRect[1] = tr;
+            tempRect[2] = br;
+            tempRect[3] = bl;
+        }
+
+        if (width >= 1.2 * height) { // If card is horizontally oriented
+            tempRect[0] = bl;
+            tempRect[1] = tl;
+            tempRect[2] = tr;
+            tempRect[3] = br;
+        }
+
+        // If the card is 'diamond' oriented, a different algorithm
+        // has to be used to identify which point is top left, top right
+        // bottom left, and bottom right.
+
+        if (width > 0.8 * height && width < 1.2 * height) { // If card is diamond oriented
+
+            // If furthest left point is higher than furthest right point,
+            // card is tilted to the left.
+            if (pts.get(1, 0)[1] <= pts.get(3, 0)[1]) {
+
+                // If card is titled to the left, approxPolyDP returns points
+                // in this order:    top right, top left, bottom left, bottom right
+                tempRect[0].x = pts.get(1,0)[0]; // Top left
+                tempRect[0].y = pts.get(1,0)[1];
+                tempRect[1].x = pts.get(0,0)[0]; // Top right
+                tempRect[1].y = pts.get(0,0)[1];
+                tempRect[2].x = pts.get(3,0)[0]; // Bottom right
+                tempRect[2].y = pts.get(3,0)[1];
+                tempRect[3].x = pts.get(2,0)[0]; // Bottom left
+                tempRect[3].y = pts.get(2,0)[1];
+            }
+
+            // If furthest left point is lower than furthest right point,
+            // card is tilted to the right
+            if (pts.get(1, 0)[1] > pts.get(3, 0)[1]) {
+
+                // If card is titled to the right, ptsPolyDP returns points
+                //in this order: top left, bottom left, bottom right, top right
+                tempRect[0].x = pts.get(0,0)[0]; // Top left
+                tempRect[0].y = pts.get(0,0)[1];
+                tempRect[1].x = pts.get(3,0)[0]; // Top right
+                tempRect[1].y = pts.get(3,0)[1];
+                tempRect[2].x = pts.get(2,0)[0]; // Bottom right
+                tempRect[2].y = pts.get(2,0)[1];
+                tempRect[3].x = pts.get(1,0)[0]; // Bottom left
+                tempRect[3].y = pts.get(1,0)[1];
+            }
+        }
+
+        List<Point> source = new ArrayList<>();
+
+        source.add(tempRect[0]);
+        source.add(tempRect[1]);
+        source.add(tempRect[2]);
+        source.add(tempRect[3]);
+
+        Mat startM = Converters.vector_Point2f_to_Mat(source);
+
+        Mat result = warp(image, startM);
+
+        return result;
+    }
+
+    private static Mat warp(Mat inputMat, Mat startM) {
+
+        int resultWidth = 200;
+        int resultHeight = 300;
+
+        Mat warp = new Mat(resultWidth, resultHeight, CvType.CV_8UC4);
+
+        Point pointOut1 = new Point(0, 0);
+        Point pointOut2 = new Point(resultWidth - 1, 0);
+        Point pointOut3 = new Point(resultWidth - 1, resultHeight - 1);
+        Point pointOut4 = new Point(0, resultHeight - 1);
+
+        List<Point> dest = new ArrayList<>();
+
+        dest.add(pointOut1);
+        dest.add(pointOut2);
+        dest.add(pointOut3);
+        dest.add(pointOut4);
+
+        Mat endM = Converters.vector_Point2f_to_Mat(dest);
+
+        Mat perspectiveTransform = Imgproc.getPerspectiveTransform(startM, endM);
+
+        Imgproc.warpPerspective(inputMat, warp, perspectiveTransform, new Size(resultWidth, resultHeight), Imgproc.INTER_CUBIC);
+
+        Mat outWarp = new Mat();
+        Imgproc.cvtColor(warp, outWarp, Imgproc.COLOR_BGR2GRAY);
+
+        return outWarp;
+    }
+}
 
