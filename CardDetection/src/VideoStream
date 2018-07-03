@@ -1,1 +1,37 @@
+package sample;
 
+import org.opencv.core.*;
+import org.opencv.videoio.VideoCapture;
+
+public class VideoStream {
+
+    private VideoCapture capture;
+    private Mat frame = new Mat();
+    private boolean grabbed;
+
+    public VideoStream() {
+    }
+
+    public void start(int src) {
+        // Initialize the USB camera and the camera image stream
+        this.capture = new VideoCapture(src);
+
+        // Read first frame from the stream
+        this.grabbed = this.capture.read(this.frame);
+    }
+
+    public void start(String src) {
+        // Initialize video image stream
+        this.capture = new VideoCapture(src);
+
+        // Read first frame from the stream
+        this.grabbed = this.capture.read(this.frame);
+    }
+
+    public Mat read() {
+        this.grabbed = this.capture.read(this.frame);
+        return this.frame;
+    }
+
+    public void stop() { this.capture.release(); }
+}
