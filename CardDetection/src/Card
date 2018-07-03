@@ -1,1 +1,31 @@
+package sample;
+
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+
+public class Card {
+
+    public static String UNKNOWN = "???";
+
+    public MatOfPoint contour;              // Contour of card
+    public int width = 0;                   // Width of card
+    public int height = 0;                  // Height of card
+    public MatOfPoint cornerPoints;         // Corner points of card
+    public Point center;                    // Center point of card
+    public Mat warp;                        // 200 x 300, flattened, grayed, blurred image
+    public Mat rankImage = new Mat();       // Thresholded, sized image of card's rank
+    public Mat suitImage = new Mat();       // Thresholded, sized image of card's suit
+    public String matchedRank = UNKNOWN;    // Best matched rank
+    public String matchedSuit = UNKNOWN;    // Best matched suit
+    public double diffRank = 0;             // Match between rank image and best matched train rank image
+    public double diffSuit = 0;             // Match between suit image and best matched train suit image
+
+    public String toString() {
+        if (matchedRank == UNKNOWN && matchedSuit == UNKNOWN)
+            return UNKNOWN;
+
+        return matchedSuit + " " + matchedRank;
+    }
+}
 
